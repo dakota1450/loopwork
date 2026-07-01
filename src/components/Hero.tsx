@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { BRAND, NAV_LINKS } from '../lib/constants';
 
+const B = import.meta.env.BASE_URL;
+
 /* ------------------------------------------------------------------ */
 /* Logo                                                                */
 /* ------------------------------------------------------------------ */
@@ -161,220 +163,24 @@ function Nav() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Work deck — real project pieces, floating in 3D                     */
-/* ------------------------------------------------------------------ */
-const B = import.meta.env.BASE_URL;
-
-type Piece = {
-  id: string;
-  kind: 'video' | 'image';
-  src: string;
-  poster?: string;
-  frame: 'browser' | 'phone' | 'soft';
-  brand: string;
-  tag: string;
-  autoplay?: boolean;
-  // desktop placement inside the 600x560 deck canvas
-  style: React.CSSProperties;
-  depth: number;
-  rot: number;
-  tz: number;
-  delay: number;
-  float: number;
-  z: number;
-};
-
-const PIECES: Piece[] = [
-  {
-    id: 'boulder',
-    kind: 'image',
-    src: `${B}work/boulder-dashboard.png`,
-    frame: 'browser',
-    brand: 'Boulder Bibs',
-    tag: 'Production dashboard',
-    style: { left: 0, top: 64, width: 384, height: 256 },
-    depth: 44,
-    rot: -4,
-    tz: -30,
-    delay: 0,
-    float: 11,
-    z: 1,
-  },
-  {
-    id: 'oasis',
-    kind: 'video',
-    src: `${B}work/oasis.mp4`,
-    poster: `${B}work/oasis-poster.jpg`,
-    frame: 'soft',
-    brand: 'Oasis',
-    tag: 'Ambient AI workspace',
-    style: { left: 366, top: 0, width: 234, height: 150 },
-    depth: 30,
-    rot: 6,
-    tz: 12,
-    delay: 1.2,
-    float: 10,
-    z: 2,
-  },
-  {
-    id: 'bibsite-company',
-    kind: 'image',
-    src: `${B}work/bibsite-company.png`,
-    frame: 'browser',
-    brand: 'BibSite',
-    tag: 'Team order dashboard',
-    style: { left: 196, top: 258, width: 384, height: 256 },
-    depth: 18,
-    rot: 3,
-    tz: 44,
-    delay: 0.8,
-    float: 9,
-    z: 3,
-  },
-  {
-    id: 'bibsite-client',
-    kind: 'video',
-    src: `${B}work/bibsite-client.mp4`,
-    frame: 'phone',
-    brand: 'BibSite',
-    tag: 'Race registration — client',
-    autoplay: true,
-    style: { left: 26, top: 168, width: 156, height: 330 },
-    depth: 12,
-    rot: -3,
-    tz: 74,
-    delay: 0.4,
-    float: 8,
-    z: 4,
-  },
+const MARQUEE = [
+  'Custom software',
+  'Workflow automation',
+  'Internal tools',
+  'AI assistants',
+  'Client portals',
+  'Live dashboards',
+  'API integrations',
+  'Lead systems',
 ];
 
-function WorkPanel({ piece, reduced }: { piece: Piece; reduced: boolean }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const play = () => {
-    const v = videoRef.current;
-    if (v) v.play().catch(() => {});
-  };
-  const pause = () => {
-    const v = videoRef.current;
-    if (v && !piece.autoplay) {
-      v.pause();
-    }
-  };
-
-  const vars = {
-    ['--depth' as string]: piece.depth,
-    ['--rot' as string]: `${piece.rot}deg`,
-    ['--tz' as string]: `${piece.tz}px`,
-    ['--delay' as string]: `${piece.delay}s`,
-    ['--float' as string]: `${piece.float}s`,
-  } as React.CSSProperties;
-
-  return (
-    <figure
-      className="work-panel"
-      style={{ ...piece.style, ...vars, zIndex: piece.z }}
-      onMouseEnter={play}
-      onMouseLeave={pause}
-    >
-      <div className="panel-float" style={{ height: '100%' }}>
-        <div className="panel-tilt" style={{ height: '100%' }}>
-          {piece.frame === 'browser' && (
-            <div className="panel-chrome">
-              <span className="dot" style={{ background: '#ff5f57' }} />
-              <span className="dot" style={{ background: '#febc2e' }} />
-              <span className="dot" style={{ background: '#28c840' }} />
-              <span className="bar" />
-            </div>
-          )}
-          <div
-            className="panel-screen"
-            style={{ height: piece.frame === 'browser' ? 'calc(100% - 26px)' : '100%' }}
-          >
-            {piece.kind === 'video' ? (
-              <video
-                ref={videoRef}
-                src={piece.src}
-                poster={piece.poster}
-                muted
-                loop
-                playsInline
-                autoPlay={piece.autoplay && !reduced}
-                preload={piece.autoplay ? 'auto' : 'none'}
-              />
-            ) : (
-              <img src={piece.src} alt={`${piece.brand} — ${piece.tag}`} loading="lazy" />
-            )}
-            <figcaption className="panel-label">
-              <span className="panel-live" />
-              <span className="text-xs font-medium">
-                <span className="text-white">{piece.brand}</span>
-                <span className="text-white/55"> · {piece.tag}</span>
-              </span>
-            </figcaption>
-          </div>
-        </div>
-      </div>
-    </figure>
-  );
-}
-
 /* ------------------------------------------------------------------ */
-/* Hero                                                                */
+/* Hero — Higgsfield-animated "living loop" video header               */
 /* ------------------------------------------------------------------ */
 export default function Hero() {
-  const deckRef = useRef<HTMLDivElement>(null);
-  const mouse = useRef({ x: 0, y: 0 });
-  const smooth = useRef({ x: 0, y: 0 });
-  const rafRef = useRef(0);
-  const runningRef = useRef(false);
   const [reduced, setReduced] = useState(false);
-
   useEffect(() => {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setReduced(prefersReduced);
-    const noHover = window.matchMedia('(hover: none)').matches;
-    const deck = deckRef.current;
-    if (!deck || prefersReduced || noHover) return;
-
-    const set = (x: number, y: number) => {
-      deck.style.setProperty('--mx', x.toFixed(3));
-      deck.style.setProperty('--my', y.toFixed(3));
-    };
-
-    const tick = () => {
-      smooth.current.x += (mouse.current.x - smooth.current.x) * 0.08;
-      smooth.current.y += (mouse.current.y - smooth.current.y) * 0.08;
-      set(smooth.current.x, smooth.current.y);
-      const dx = mouse.current.x - smooth.current.x;
-      const dy = mouse.current.y - smooth.current.y;
-      if (dx * dx + dy * dy < 0.00002) {
-        set(mouse.current.x, mouse.current.y);
-        runningRef.current = false;
-        return;
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    const start = () => {
-      if (runningRef.current) return;
-      runningRef.current = true;
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    const onMove = (e: PointerEvent) => {
-      // normalized -1..1 relative to viewport center
-      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.current.y = (e.clientY / window.innerHeight) * 2 - 1;
-      start();
-    };
-
-    window.addEventListener('pointermove', onMove, { passive: true });
-    return () => {
-      window.removeEventListener('pointermove', onMove);
-      cancelAnimationFrame(rafRef.current);
-      runningRef.current = false;
-    };
+    setReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }, []);
 
   return (
@@ -384,64 +190,73 @@ export default function Hero() {
       className="relative w-full overflow-hidden bg-[#08080b]"
       style={{ minHeight: '100dvh' }}
     >
-      {/* Backdrop: dark with a warm brand glow + faint grid */}
+      {/* Animated hero video (generated with Higgsfield) */}
+      <video
+        className="absolute inset-0 z-0 h-full w-full object-cover"
+        poster={`${B}hero-poster.webp`}
+        autoPlay={!reduced}
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+      >
+        <source src={`${B}hero-loop.mp4`} type="video/mp4" />
+      </video>
+
+      {/* Filmic scrims for legibility (darker on the left where the copy sits) */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0"
+        className="pointer-events-none absolute inset-0 z-10"
         style={{
           background:
-            'radial-gradient(1100px 700px at 72% 28%, rgba(232,112,42,0.18), transparent 60%), radial-gradient(900px 600px at 10% 90%, rgba(59,130,246,0.10), transparent 55%)',
+            'linear-gradient(90deg, rgba(8,8,11,0.94) 0%, rgba(8,8,11,0.75) 32%, rgba(8,8,11,0.2) 62%, rgba(8,8,11,0) 100%), linear-gradient(to top, rgba(8,8,11,0.85) 0%, transparent 34%)',
         }}
       />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 opacity-[0.05]"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)',
-          backgroundSize: '46px 46px',
-          maskImage: 'radial-gradient(circle at 60% 40%, black, transparent 75%)',
-          WebkitMaskImage: 'radial-gradient(circle at 60% 40%, black, transparent 75%)',
-        }}
-      />
+      {/* Film grain — filmic texture so it doesn't read as a flat template */}
+      <div aria-hidden="true" className="grain pointer-events-none absolute inset-0 z-10" />
 
       <Nav />
 
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-7xl flex-col items-center gap-10 px-6 pt-28 pb-16 lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center lg:gap-6 lg:pt-20">
-        {/* Left — copy */}
-        <div className="max-w-xl text-center lg:text-left">
+      {/* Copy */}
+      <div className="relative z-20 mx-auto flex min-h-[100dvh] max-w-7xl flex-col justify-center px-6 pt-28 pb-24">
+        <div className="max-w-2xl">
           <span
-            className="hero-anim hero-fade inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/75 backdrop-blur"
+            className="hero-anim hero-fade inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-white/75 backdrop-blur"
             style={{ animationDelay: '0.1s' }}
           >
-            <span className="panel-live" />
-            Real software, shipped for real businesses
+            <span className="hero-live" />
+            Software studio for small business
           </span>
-          <h1 className="mt-6 text-white leading-[0.92]">
+          <h1 className="mt-6 text-white leading-[0.9]">
             <span
-              className="block font-playfair italic font-normal text-5xl sm:text-6xl md:text-7xl hero-anim hero-reveal"
-              style={{ letterSpacing: '-0.04em', animationDelay: '0.25s' }}
+              className="block font-playfair italic font-normal text-6xl sm:text-7xl md:text-8xl hero-anim hero-reveal"
+              style={{ letterSpacing: '-0.04em', animationDelay: '0.28s' }}
             >
-              Think it.
+              If you can think it,
             </span>
             <span
-              className="block font-semibold text-5xl sm:text-6xl md:text-7xl -mt-1 hero-anim hero-reveal"
-              style={{ letterSpacing: '-0.06em', animationDelay: '0.42s' }}
+              className="block font-semibold text-6xl sm:text-7xl md:text-8xl -mt-1 hero-anim hero-reveal"
+              style={{ letterSpacing: '-0.05em', animationDelay: '0.46s' }}
             >
-              We build it.
+              we can{' '}
+              <span className="relative">
+                <span className="bg-gradient-to-r from-[#ffb37a] via-[#e8702a] to-[#e8702a] bg-clip-text text-transparent">
+                  build it.
+                </span>
+              </span>
             </span>
           </h1>
           <p
-            className="mx-auto lg:mx-0 mt-6 max-w-md text-base sm:text-lg leading-relaxed text-white/70 hero-anim hero-fade"
-            style={{ animationDelay: '0.7s' }}
+            className="mt-7 max-w-lg text-lg leading-relaxed text-white/70 hero-anim hero-fade"
+            style={{ animationDelay: '0.72s' }}
           >
-            High-ROI software, automations, and internal tools for small businesses — from
-            customer-facing sites to the dashboards that run the back office.{' '}
-            <span className="text-white/90">Hover the work to see it live.</span>
+            High-ROI software, automations, and internal tools — designed, built, and shipped for
+            small businesses in fixed-price sprints.
           </p>
           <div
-            className="mt-8 flex flex-col sm:flex-row items-center lg:items-start gap-4 hero-anim hero-fade"
-            style={{ animationDelay: '0.85s' }}
+            className="mt-9 flex flex-col sm:flex-row items-start gap-4 hero-anim hero-fade"
+            style={{ animationDelay: '0.88s' }}
           >
             <a
               href={BRAND.calLink}
@@ -450,21 +265,25 @@ export default function Hero() {
               Book a Free Audit
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
             </a>
-            <div className="flex items-center gap-2 text-xs text-white/50">
-              <span className="font-semibold text-white/75">Featured builds:</span>
-              BibSite · Boulder Bibs · Oasis
-            </div>
+            <a
+              href="#builds"
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-7 py-3.5 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
+            >
+              See what we&apos;ve built
+            </a>
           </div>
         </div>
+      </div>
 
-        {/* Right — interactive work deck */}
-        <div
-          className="work-deck relative flex w-full items-center justify-center lg:justify-end hero-anim hero-fade"
-          style={{ animationDelay: '0.55s' }}
-        >
-          <div ref={deckRef} className="deck-inner">
-            {PIECES.map((p) => (
-              <WorkPanel key={p.id} piece={p} reduced={reduced} />
+      {/* Capability marquee — editorial motion strip along the bottom */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-black/30 py-3 backdrop-blur-sm">
+        <div className="hero-marquee">
+          <div className="hero-marquee-track">
+            {[...MARQUEE, ...MARQUEE].map((item, i) => (
+              <span key={i} className="hero-marquee-item">
+                {item}
+                <span className="text-[#e8702a]">✦</span>
+              </span>
             ))}
           </div>
         </div>

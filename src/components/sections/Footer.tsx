@@ -1,4 +1,5 @@
 import { BRAND, NAV_LINKS } from '../../lib/constants';
+import Reveal from '../Reveal';
 
 const columns = [
   {
@@ -21,7 +22,7 @@ export default function Footer() {
   return (
     <footer className="bg-neutral-950 text-white">
       <div className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
+        <Reveal className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5">
@@ -87,7 +88,7 @@ export default function Footer() {
               </a>
             </div>
           </div>
-        </div>
+        </Reveal>
 
         <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-sm text-white/60 sm:flex-row">
           <p>

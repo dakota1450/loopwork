@@ -1,5 +1,8 @@
 import { Check } from 'lucide-react';
 import Reveal from '../Reveal';
+import Tilt from '../Tilt';
+import Aurora from '../Aurora';
+import SectionLabel from '../SectionLabel';
 import { BRAND } from '../../lib/constants';
 
 const stats = [
@@ -42,13 +45,17 @@ const plans = [
 
 export default function Offer() {
   return (
-    <section id="offer" className="relative py-24 sm:py-32">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="offer" className="relative overflow-hidden py-24 sm:py-32">
+      {/* Blend the dark cinematic Overture into the light content above */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-28 bg-gradient-to-b from-[#08080b]/25 to-transparent"
+      />
+      <Aurora intensity={0.5} />
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
         <Reveal className="max-w-2xl">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#b1531a]">
-            The offer
-          </span>
-          <h2 className="mt-4 text-4xl sm:text-5xl font-semibold tracking-[-0.03em] text-neutral-900">
+          <SectionLabel index="01">The offer</SectionLabel>
+          <h2 className="mt-5 text-4xl sm:text-5xl font-semibold tracking-[-0.03em] text-neutral-900">
             One sprint to a tool that{' '}
             <span className="font-playfair italic font-medium">pays for itself</span>.
           </h2>
@@ -59,23 +66,33 @@ export default function Offer() {
         </Reveal>
 
         {/* Stats strip */}
-        <Reveal delay={0.05}>
-          <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-200">
-            {stats.map((s) => (
-              <div key={s.label} className="bg-white px-6 py-7 text-center">
-                <div className="text-3xl font-semibold tracking-[-0.03em] text-neutral-900">
+        <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {stats.map((s, i) => (
+            <Reveal key={s.label} delay={0.05 * i}>
+              <div className="group relative h-full overflow-hidden rounded-2xl border border-neutral-200 bg-white px-5 py-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#e8702a]/40 hover:shadow-lg">
+                <span className="absolute left-0 top-0 h-1 w-0 bg-[#e8702a] transition-all duration-500 group-hover:w-full" />
+                <div className="font-mono text-[11px] tabular-nums text-[#b1531a]/70">
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                <div className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-neutral-900">
                   {s.value}
                 </div>
                 <div className="mt-1 text-sm text-neutral-500">{s.label}</div>
               </div>
-            ))}
-          </div>
-        </Reveal>
+            </Reveal>
+          ))}
+        </div>
 
         {/* Plans */}
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           {plans.map((plan, i) => (
-            <Reveal key={plan.name} delay={0.05 * (i + 1)}>
+            <Reveal
+              key={plan.name}
+              delay={0.05 * (i + 1)}
+              variant={i === 0 ? 'left' : 'right'}
+              className="h-full"
+            >
+              <Tilt className="h-full" max={5} lift={4}>
               <div
                 className={`flex h-full flex-col rounded-3xl border p-8 transition-shadow ${
                   plan.highlight
@@ -128,6 +145,7 @@ export default function Offer() {
                   {plan.highlight ? 'Start a sprint' : 'Talk to us'}
                 </a>
               </div>
+              </Tilt>
             </Reveal>
           ))}
         </div>

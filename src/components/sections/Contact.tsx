@@ -126,7 +126,7 @@ export default function Contact() {
 
       <div className="relative mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-2 lg:items-center">
         {/* Left — pitch */}
-        <Reveal>
+        <Reveal variant="left">
           <h2 className="text-4xl sm:text-5xl font-semibold leading-[1.05] tracking-[-0.03em] text-white">
             If you can think it,{' '}
             <span className="font-playfair italic font-medium text-[#e8702a]">we can build it</span>.
@@ -155,7 +155,7 @@ export default function Contact() {
         </Reveal>
 
         {/* Right — form card */}
-        <Reveal delay={0.08}>
+        <Reveal delay={0.08} variant="right">
           <div className="rounded-3xl bg-white p-6 shadow-2xl shadow-black/30 sm:p-8">
             {status === 'success' ? (
               <div

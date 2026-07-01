@@ -1,5 +1,6 @@
 import { ChevronDown } from 'lucide-react';
 import Reveal from '../Reveal';
+import SectionLabel from '../SectionLabel';
 
 const faqs = [
   {
@@ -33,34 +34,34 @@ export default function Faq() {
     <section id="faq" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-3xl px-6">
         <Reveal className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#b1531a]">
+          <SectionLabel index="05" center>
             FAQ
-          </span>
-          <h2 className="mt-4 text-4xl sm:text-5xl font-semibold tracking-[-0.03em] text-neutral-900">
+          </SectionLabel>
+          <h2 className="mt-5 text-4xl sm:text-5xl font-semibold tracking-[-0.03em] text-neutral-900">
             Questions, <span className="font-playfair italic font-medium">answered</span>.
           </h2>
         </Reveal>
 
-        <Reveal delay={0.05}>
-          <div className="mt-12 divide-y divide-neutral-200 border-y border-neutral-200">
-            {faqs.map((item) => (
-              <details key={item.q} className="group py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left [&::-webkit-details-marker]:hidden">
-                  <span className="text-base font-medium text-neutral-900 sm:text-lg">
+        <div className="mt-12 divide-y divide-neutral-200 border-y border-neutral-200">
+          {faqs.map((item, i) => (
+            <Reveal key={item.q} delay={0.04 * i}>
+              <details className="group py-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left transition-colors [&::-webkit-details-marker]:hidden hover:[&>span]:text-[#b1531a]">
+                  <span className="text-base font-medium text-neutral-900 transition-colors sm:text-lg">
                     {item.q}
                   </span>
                   <ChevronDown
                     size={20}
-                    className="shrink-0 text-neutral-400 transition-transform duration-300 group-open:rotate-180"
+                    className="shrink-0 text-neutral-400 transition-transform duration-300 group-open:rotate-180 group-open:text-[#e8702a]"
                   />
                 </summary>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500 sm:text-base">
                   {item.a}
                 </p>
               </details>
-            ))}
-          </div>
-        </Reveal>
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -1,5 +1,8 @@
 import { Check } from 'lucide-react';
 import Reveal from '../Reveal';
+import Tilt from '../Tilt';
+import Aurora from '../Aurora';
+import SectionLabel from '../SectionLabel';
 import { BRAND } from '../../lib/constants';
 
 const tiers = [
@@ -40,13 +43,14 @@ const tiers = [
 
 export default function Pricing() {
   return (
-    <section id="pricing" className="relative bg-neutral-50 py-24 sm:py-32">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="pricing" className="relative overflow-hidden bg-neutral-50 py-24 sm:py-32">
+      <Aurora intensity={0.55} />
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#b1531a]">
+          <SectionLabel index="04" center>
             Pricing
-          </span>
-          <h2 className="mt-4 text-4xl sm:text-5xl font-semibold tracking-[-0.03em] text-neutral-900">
+          </SectionLabel>
+          <h2 className="mt-5 text-4xl sm:text-5xl font-semibold tracking-[-0.03em] text-neutral-900">
             Simple, <span className="font-playfair italic font-medium">fixed</span> pricing.
           </h2>
           <p className="mt-5 text-lg text-neutral-500 leading-relaxed">
@@ -56,7 +60,13 @@ export default function Pricing() {
 
         <div className="mt-14 grid items-stretch gap-6 lg:grid-cols-3">
           {tiers.map((tier, i) => (
-            <Reveal key={tier.name} delay={0.06 * i} className="h-full">
+            <Reveal
+              key={tier.name}
+              delay={0.06 * i}
+              variant={i === 0 ? 'left' : i === 2 ? 'right' : 'up'}
+              className="h-full"
+            >
+              <Tilt className="h-full" max={5} lift={tier.featured ? 2 : 5}>
               <div
                 className={`relative flex h-full flex-col rounded-3xl border p-8 ${
                   tier.featured
@@ -104,6 +114,7 @@ export default function Pricing() {
                   {tier.cta}
                 </a>
               </div>
+              </Tilt>
             </Reveal>
           ))}
         </div>

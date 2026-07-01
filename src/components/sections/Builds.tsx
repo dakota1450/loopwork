@@ -1,17 +1,9 @@
 import Reveal from '../Reveal';
 import DemoBibsite from '../DemoBibsite';
 import DemoOasis from '../DemoOasis';
-
-const CAPABILITIES = [
-  'Internal tools & dashboards',
-  'Workflow automation',
-  'AI assistants & copilots',
-  'Client & customer portals',
-  'Data pipelines & reporting',
-  'App & API integrations',
-  'Lead capture & CRM',
-  'Custom web apps',
-];
+import CapabilityGrid from '../CapabilityGrid';
+import Aurora from '../Aurora';
+import SectionLabel from '../SectionLabel';
 
 function DemoHeader({ title, sub, ref_ }: { title: string; sub: string; ref_: string }) {
   return (
@@ -29,13 +21,12 @@ function DemoHeader({ title, sub, ref_ }: { title: string; sub: string; ref_: st
 
 export default function Builds() {
   return (
-    <section id="builds" className="relative bg-white py-24 sm:py-32">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="builds" className="relative overflow-hidden bg-white py-24 sm:py-32">
+      <Aurora intensity={0.4} />
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
         <Reveal className="max-w-2xl">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#b1531a]">
-            Proof, not promises
-          </span>
-          <h2 className="mt-4 text-4xl sm:text-5xl font-semibold tracking-[-0.03em] text-neutral-900">
+          <SectionLabel index="03">Proof, not promises</SectionLabel>
+          <h2 className="mt-5 text-4xl sm:text-5xl font-semibold tracking-[-0.03em] text-neutral-900">
             If you can think it,{' '}
             <span className="font-playfair italic font-medium">we can build it</span>.
           </h2>
@@ -63,25 +54,7 @@ export default function Builds() {
           <DemoOasis />
         </Reveal>
 
-        <Reveal delay={0.05}>
-          <div className="mt-16 border-t border-neutral-200 pt-8">
-            <p className="text-sm text-neutral-500">
-              <span className="font-semibold text-neutral-800">Real systems, shipped.</span> These
-              demos are inspired by production work we&apos;ve built for BibSite, Boulder Bibs, and
-              Oasis — and whatever you need next:
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2.5">
-              {CAPABILITIES.map((c) => (
-                <span
-                  key={c}
-                  className="rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1.5 text-sm text-neutral-700"
-                >
-                  {c}
-                </span>
-              ))}
-            </div>
-          </div>
-        </Reveal>
+        <CapabilityGrid />
       </div>
     </section>
   );

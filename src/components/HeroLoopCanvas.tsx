@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { cine, clamp01, easeInOut } from '../lib/motion';
 
 /**
  * Interactive hero: embers flow along an infinity (lemniscate) path — the
@@ -24,6 +25,11 @@ export default function HeroLoopCanvas() {
     let cy = 0;
     let scale = 0;
     const mouse = { x: -9999, y: -9999, active: false };
+    // Cinematic zoom: the Overture writes cine.p (0→1) as it is scrubbed; the
+    // loop flies toward the viewer and recenters over the first third, so the
+    // whole intro reads as "zooming into the infinity loop".
+    let energy = 1; // eased toward the scroll target for smooth response
+    let zoomEased = 1;
 
     const lem = (t: number) => {
       const s = Math.sin(t);
@@ -66,17 +72,30 @@ export default function HeroLoopCanvas() {
         if (r.width > 0 && r.height > 0) rebuild(r.width, r.height);
         else return;
       }
+      // Drive the zoom from the cinematic scroll progress. Over the first ~third
+      // of the Overture the loop scales up ~6× and drifts to centre — the camera
+      // "flies into" it — while flow speeds up and trails stretch.
+      const zin = easeInOut(clamp01(cine.p / 0.34));
+      const zoomTarget = 1 + zin * 5.4;
+      zoomEased += (zoomTarget - zoomEased) * 0.08;
+      energy += (1 + zin * 1.9 - energy) * 0.05;
+      const trailAlpha = 0.2 - zin * 0.09;
+      // Recenter toward the viewport middle as we zoom in.
+      const zcx = cx + (w * 0.5 - cx) * zin;
+      const zcy = cy + (h * 0.5 - cy) * zin;
+
       ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = 'rgba(8,8,11,0.20)';
+      ctx.fillStyle = `rgba(8,8,11,${trailAlpha.toFixed(3)})`;
       ctx.fillRect(0, 0, w, h);
       ctx.globalCompositeOperation = 'lighter';
 
-      const R = 155;
+      const R = 190;
+      const alpha = (0.55 + zin * 0.22).toFixed(3);
       for (const p of particles) {
-        if (!reduced) p.t += p.speed;
+        if (!reduced) p.t += p.speed * energy;
         const b = lem(p.t);
-        let px = cx + (b.x + b.x * p.off) * scale;
-        let py = cy + (b.y + b.y * p.off) * scale;
+        let px = zcx + (b.x + b.x * p.off) * scale * zoomEased;
+        let py = zcy + (b.y + b.y * p.off) * scale * zoomEased;
 
         if (mouse.active) {
           const dx = px - mouse.x;
@@ -84,9 +103,15 @@ export default function HeroLoopCanvas() {
           const d2 = dx * dx + dy * dy;
           if (d2 < R * R) {
             const d = Math.sqrt(d2) || 1;
-            const f = (1 - d / R) * 4.2;
-            p.ox += (dx / d) * f;
-            p.oy += (dy / d) * f;
+            const f = 1 - d / R;
+            const nx = dx / d;
+            const ny = dy / d;
+            // Repel outward…
+            p.ox += nx * f * 5.0;
+            p.oy += ny * f * 5.0;
+            // …plus a tangential push, so dragging the cursor swirls the embers.
+            p.ox += -ny * f * 3.0;
+            p.oy += nx * f * 3.0;
           }
         }
         p.ox *= 0.9;
@@ -96,7 +121,7 @@ export default function HeroLoopCanvas() {
 
         const g = 120 + Math.round(95 * p.hue);
         const bl = 40 + Math.round(55 * p.hue);
-        ctx.fillStyle = `rgba(255,${g},${bl},0.55)`;
+        ctx.fillStyle = `rgba(255,${g},${bl},${alpha})`;
         ctx.beginPath();
         ctx.arc(px, py, p.size, 0, Math.PI * 2);
         ctx.fill();
@@ -157,7 +182,6 @@ export default function HeroLoopCanvas() {
         raf = requestAnimationFrame(loop);
       }
     };
-
     window.addEventListener('pointermove', toLocal, { passive: true });
     window.addEventListener('pointerdown', toLocal, { passive: true });
     window.addEventListener('blur', onLeave);

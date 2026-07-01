@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# When you deploy, add your sitemap, e.g.:
+# Sitemap: https://yourdomain.com/sitemap.xml

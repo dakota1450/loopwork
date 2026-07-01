@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { BRAND, NAV_LINKS } from '../lib/constants';
-
-const B = import.meta.env.BASE_URL;
+import HeroLoopCanvas from './HeroLoopCanvas';
 
 /* ------------------------------------------------------------------ */
 /* Logo                                                                */
@@ -178,11 +177,6 @@ const MARQUEE = [
 /* Hero — Higgsfield-animated "living loop" video header               */
 /* ------------------------------------------------------------------ */
 export default function Hero() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    setReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  }, []);
-
   return (
     <section
       id="top"
@@ -190,19 +184,8 @@ export default function Hero() {
       className="relative w-full overflow-hidden bg-[#08080b]"
       style={{ minHeight: '100dvh' }}
     >
-      {/* Animated hero video (generated with Higgsfield) */}
-      <video
-        className="absolute inset-0 z-0 h-full w-full object-cover"
-        poster={`${B}hero-poster.webp`}
-        autoPlay={!reduced}
-        muted
-        loop
-        playsInline
-        preload="auto"
-        aria-hidden="true"
-      >
-        <source src={`${B}hero-loop.mp4`} type="video/mp4" />
-      </video>
+      {/* Interactive canvas hero — the Loopwork loop, alive + cursor-reactive */}
+      <HeroLoopCanvas />
 
       {/* Filmic scrims for legibility (darker on the left where the copy sits) */}
       <div

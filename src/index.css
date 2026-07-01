@@ -344,6 +344,27 @@ body {
   to { width: 100%; }
 }
 
+/* ---- Live demos (BibSite / Oasis) ---- */
+@keyframes rowNew {
+  0% { background: rgba(232, 112, 42, 0.2); }
+  100% { background: transparent; }
+}
+.demo-row-new { animation: rowNew 2.4s ease-out; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.demo-toast { animation: toastIn 0.3s ease-out; }
+@keyframes caretBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.oasis-caret {
+  animation: caretBlink 1s steps(1) infinite;
+  color: #7dd3c0;
+  margin-left: 1px;
+}
+
 /* Neutralize all remaining motion for users who request reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   *,

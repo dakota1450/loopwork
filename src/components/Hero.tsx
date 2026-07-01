@@ -1,6 +1,6 @@
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
-import { BG_IMAGE_1, BG_IMAGE_2, SPOTLIGHT_R, BRAND, NAV_LINKS } from '../lib/constants';
+import { BRAND, NAV_LINKS } from '../lib/constants';
 
 /* ------------------------------------------------------------------ */
 /* Logo                                                                */
@@ -13,7 +13,6 @@ function LogoMark({ scrolled }: { scrolled: boolean }) {
           scrolled ? 'bg-neutral-900' : 'bg-white'
         }`}
       >
-        {/* Custom "loop" mark — a continuous infinity loop */}
         <svg
           width="18"
           height="18"
@@ -47,12 +46,10 @@ function Nav() {
   const [activeId, setActiveId] = useState('');
   const navRef = useRef<HTMLElement>(null);
 
-  // Switch to a solid light bar once we leave the dark hero, and track which
-  // section is currently in view to highlight the matching nav link.
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 40);
-      const offset = 120; // clear the fixed nav
+      const offset = 120;
       let current = '';
       for (const link of NAV_LINKS) {
         const el = document.getElementById(link.href.slice(1));
@@ -65,7 +62,6 @@ function Nav() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // While the mobile menu is open, close it on Escape, outside click, or scroll.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -92,10 +88,8 @@ function Nav() {
         scrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : ''
       }`}
     >
-      {/* Left — logo + wordmark */}
       <LogoMark scrolled={scrolled} />
 
-      {/* Center — glass pill (desktop) */}
       <div
         className={`hidden md:flex absolute left-1/2 -translate-x-1/2 rounded-full px-2 py-2 items-center gap-1 border transition-colors ${
           scrolled
@@ -121,7 +115,6 @@ function Nav() {
         })}
       </div>
 
-      {/* Right — primary CTA (desktop) */}
       <a
         href={BRAND.calLink}
         className={`hidden md:block text-sm font-semibold px-6 py-2.5 rounded-full transition-colors ${
@@ -133,7 +126,6 @@ function Nav() {
         Book a Call
       </a>
 
-      {/* Mobile — hamburger */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -144,7 +136,6 @@ function Nav() {
         {open ? <X size={26} /> : <Menu size={26} />}
       </button>
 
-      {/* Mobile — dropdown menu */}
       {open && (
         <div className="md:hidden absolute top-full right-4 left-4 mt-2 rounded-2xl bg-black/80 backdrop-blur-lg border border-white/15 p-3 flex flex-col gap-1">
           {NAV_LINKS.map((link) => (
@@ -171,115 +162,210 @@ function Nav() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Reveal layer — the "built" image, unmasked only under the spotlight */
+/* Work deck — real project pieces, floating in 3D                     */
 /* ------------------------------------------------------------------ */
-// A CSS radial-gradient mask (positioned via the --spot-x / --spot-y custom
-// properties) — resolution-independent and GPU-composited, so there is no
-// per-frame canvas encoding. Defaults off-screen so only the base shows on load.
-const SPOTLIGHT_MASK =
-  `radial-gradient(circle ${SPOTLIGHT_R}px at var(--spot-x, -1000px) var(--spot-y, -1000px),` +
-  ' #000 0%, #000 40%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.4) 75%, rgba(0,0,0,0.12) 88%, rgba(0,0,0,0) 100%)';
+const B = import.meta.env.BASE_URL;
 
-const RevealLayer = forwardRef<HTMLDivElement, { image: string }>(function RevealLayer(
-  { image },
-  ref,
-) {
+type Piece = {
+  id: string;
+  kind: 'video' | 'image';
+  src: string;
+  poster?: string;
+  frame: 'browser' | 'phone' | 'soft';
+  brand: string;
+  tag: string;
+  autoplay?: boolean;
+  // desktop placement inside the 600x560 deck canvas
+  style: React.CSSProperties;
+  depth: number;
+  rot: number;
+  tz: number;
+  delay: number;
+  float: number;
+  z: number;
+};
+
+const PIECES: Piece[] = [
+  {
+    id: 'boulder',
+    kind: 'image',
+    src: `${B}work/boulder-dashboard.png`,
+    frame: 'browser',
+    brand: 'Boulder Bibs',
+    tag: 'Production dashboard',
+    style: { left: 0, top: 64, width: 384, height: 256 },
+    depth: 44,
+    rot: -4,
+    tz: -30,
+    delay: 0,
+    float: 11,
+    z: 1,
+  },
+  {
+    id: 'oasis',
+    kind: 'video',
+    src: `${B}work/oasis.mp4`,
+    poster: `${B}work/oasis-poster.jpg`,
+    frame: 'soft',
+    brand: 'Oasis',
+    tag: 'Ambient AI workspace',
+    style: { left: 366, top: 0, width: 234, height: 150 },
+    depth: 30,
+    rot: 6,
+    tz: 12,
+    delay: 1.2,
+    float: 10,
+    z: 2,
+  },
+  {
+    id: 'bibsite-company',
+    kind: 'image',
+    src: `${B}work/bibsite-company.png`,
+    frame: 'browser',
+    brand: 'BibSite',
+    tag: 'Team order dashboard',
+    style: { left: 196, top: 258, width: 384, height: 256 },
+    depth: 18,
+    rot: 3,
+    tz: 44,
+    delay: 0.8,
+    float: 9,
+    z: 3,
+  },
+  {
+    id: 'bibsite-client',
+    kind: 'video',
+    src: `${B}work/bibsite-client.mp4`,
+    frame: 'phone',
+    brand: 'BibSite',
+    tag: 'Race registration — client',
+    autoplay: true,
+    style: { left: 26, top: 168, width: 156, height: 330 },
+    depth: 12,
+    rot: -3,
+    tz: 74,
+    delay: 0.4,
+    float: 8,
+    z: 4,
+  },
+];
+
+function WorkPanel({ piece, reduced }: { piece: Piece; reduced: boolean }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const play = () => {
+    const v = videoRef.current;
+    if (v) v.play().catch(() => {});
+  };
+  const pause = () => {
+    const v = videoRef.current;
+    if (v && !piece.autoplay) {
+      v.pause();
+    }
+  };
+
+  const vars = {
+    ['--depth' as string]: piece.depth,
+    ['--rot' as string]: `${piece.rot}deg`,
+    ['--tz' as string]: `${piece.tz}px`,
+    ['--delay' as string]: `${piece.delay}s`,
+    ['--float' as string]: `${piece.float}s`,
+  } as React.CSSProperties;
+
   return (
-    <div
-      ref={ref}
-      aria-hidden="true"
-      className="absolute inset-0 bg-center bg-cover bg-no-repeat z-30 pointer-events-none"
-      style={{
-        backgroundImage: `url(${image})`,
-        maskImage: SPOTLIGHT_MASK,
-        WebkitMaskImage: SPOTLIGHT_MASK,
-      }}
-    />
+    <figure
+      className="work-panel"
+      style={{ ...piece.style, ...vars, zIndex: piece.z }}
+      onMouseEnter={play}
+      onMouseLeave={pause}
+    >
+      <div className="panel-float" style={{ height: '100%' }}>
+        <div className="panel-tilt" style={{ height: '100%' }}>
+          {piece.frame === 'browser' && (
+            <div className="panel-chrome">
+              <span className="dot" style={{ background: '#ff5f57' }} />
+              <span className="dot" style={{ background: '#febc2e' }} />
+              <span className="dot" style={{ background: '#28c840' }} />
+              <span className="bar" />
+            </div>
+          )}
+          <div
+            className="panel-screen"
+            style={{ height: piece.frame === 'browser' ? 'calc(100% - 26px)' : '100%' }}
+          >
+            {piece.kind === 'video' ? (
+              <video
+                ref={videoRef}
+                src={piece.src}
+                poster={piece.poster}
+                muted
+                loop
+                playsInline
+                autoPlay={piece.autoplay && !reduced}
+                preload={piece.autoplay ? 'auto' : 'none'}
+              />
+            ) : (
+              <img src={piece.src} alt={`${piece.brand} — ${piece.tag}`} loading="lazy" />
+            )}
+            <figcaption className="panel-label">
+              <span className="panel-live" />
+              <span className="text-xs font-medium">
+                <span className="text-white">{piece.brand}</span>
+                <span className="text-white/55"> · {piece.tag}</span>
+              </span>
+            </figcaption>
+          </div>
+        </div>
+      </div>
+    </figure>
   );
-});
+}
 
 /* ------------------------------------------------------------------ */
 /* Hero                                                                */
 /* ------------------------------------------------------------------ */
 export default function Hero() {
-  const revealRef = useRef<HTMLDivElement>(null);
-  const mouse = useRef({ x: -1000, y: -1000 });
-  const smooth = useRef({ x: -1000, y: -1000 });
+  const deckRef = useRef<HTMLDivElement>(null);
+  const mouse = useRef({ x: 0, y: 0 });
+  const smooth = useRef({ x: 0, y: 0 });
   const rafRef = useRef(0);
   const runningRef = useRef(false);
-  const seenRef = useRef(false);
-  const visibleRef = useRef(true);
+  const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
-    const reveal = revealRef.current;
-    if (!reveal) return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setReduced(prefersReduced);
+    const noHover = window.matchMedia('(hover: none)').matches;
+    const deck = deckRef.current;
+    if (!deck || prefersReduced || noHover) return;
 
-    const setSpot = (x: number, y: number) => {
-      reveal.style.setProperty('--spot-x', `${x}px`);
-      reveal.style.setProperty('--spot-y', `${y}px`);
+    const set = (x: number, y: number) => {
+      deck.style.setProperty('--mx', x.toFixed(3));
+      deck.style.setProperty('--my', y.toFixed(3));
     };
 
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const noHover = window.matchMedia('(hover: none)').matches;
-
-    // Touch / no-hover (and reduced-motion) devices get a static centered reveal,
-    // so the "built" payoff is still visible without a tracking cursor.
-    if (noHover || prefersReduced) {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight * 0.42;
-      mouse.current = { x: cx, y: cy };
-      smooth.current = { x: cx, y: cy };
-      seenRef.current = true;
-      setSpot(cx, cy);
-    }
-
-    // Reduced motion: keep the static reveal, no pointer tracking / animation.
-    if (prefersReduced) return;
-
-    // Pause the work entirely while the hero is scrolled out of view.
-    const io = new IntersectionObserver(
-      (entries) => {
-        visibleRef.current = entries[0]?.isIntersecting ?? true;
-      },
-      { threshold: 0 },
-    );
-    const section = reveal.closest('section');
-    if (section) io.observe(section);
-
-    // Self-stopping smoothing loop: trails the cursor, then halts when settled.
     const tick = () => {
-      smooth.current.x += (mouse.current.x - smooth.current.x) * 0.1;
-      smooth.current.y += (mouse.current.y - smooth.current.y) * 0.1;
-      setSpot(smooth.current.x, smooth.current.y);
-
+      smooth.current.x += (mouse.current.x - smooth.current.x) * 0.08;
+      smooth.current.y += (mouse.current.y - smooth.current.y) * 0.08;
+      set(smooth.current.x, smooth.current.y);
       const dx = mouse.current.x - smooth.current.x;
       const dy = mouse.current.y - smooth.current.y;
-      if (dx * dx + dy * dy < 0.25) {
-        smooth.current = { x: mouse.current.x, y: mouse.current.y };
-        setSpot(smooth.current.x, smooth.current.y);
+      if (dx * dx + dy * dy < 0.00002) {
+        set(mouse.current.x, mouse.current.y);
         runningRef.current = false;
         return;
       }
       rafRef.current = requestAnimationFrame(tick);
     };
-
     const start = () => {
       if (runningRef.current) return;
       runningRef.current = true;
       rafRef.current = requestAnimationFrame(tick);
     };
-
     const onMove = (e: PointerEvent) => {
-      if (!visibleRef.current) return;
-      if (!seenRef.current) {
-        // Snap to the cursor on the first move so the spotlight appears under it
-        // instead of sweeping in from the corner.
-        seenRef.current = true;
-        smooth.current = { x: e.clientX, y: e.clientY };
-        setSpot(e.clientX, e.clientY);
-      }
-      mouse.current.x = e.clientX;
-      mouse.current.y = e.clientY;
+      // normalized -1..1 relative to viewport center
+      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = (e.clientY / window.innerHeight) * 2 - 1;
       start();
     };
 
@@ -288,7 +374,6 @@ export default function Hero() {
       window.removeEventListener('pointermove', onMove);
       cancelAnimationFrame(rafRef.current);
       runningRef.current = false;
-      io.disconnect();
     };
   }, []);
 
@@ -296,67 +381,93 @@ export default function Hero() {
     <section
       id="top"
       aria-label="Loopwork — if you can think it, we can build it"
-      className="relative w-full overflow-hidden h-screen bg-black"
-      style={{ height: '100dvh' }}
+      className="relative w-full overflow-hidden bg-[#08080b]"
+      style={{ minHeight: '100dvh' }}
     >
-      {/* 1. Base image (blueprint / idea) */}
+      {/* Backdrop: dark with a warm brand glow + faint grid */}
       <div
-        className="absolute inset-0 bg-center bg-cover bg-no-repeat z-10 hero-zoom"
-        style={{ backgroundImage: `url(${BG_IMAGE_1})` }}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background:
+            'radial-gradient(1100px 700px at 72% 28%, rgba(232,112,42,0.18), transparent 60%), radial-gradient(900px 600px at 10% 90%, rgba(59,130,246,0.10), transparent 55%)',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)',
+          backgroundSize: '46px 46px',
+          maskImage: 'radial-gradient(circle at 60% 40%, black, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(circle at 60% 40%, black, transparent 75%)',
+        }}
       />
 
-      {/* 2. Reveal layer (built / product) */}
-      <RevealLayer ref={revealRef} image={BG_IMAGE_2} />
-
-      {/* Nav */}
       <Nav />
 
-      {/* 3. Heading */}
-      <div className="absolute top-[14%] left-0 right-0 z-50 flex flex-col items-center text-center px-5 pointer-events-none">
-        <h1 className="text-white leading-[0.95]">
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-7xl flex-col items-center gap-10 px-6 pt-28 pb-16 lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center lg:gap-6 lg:pt-20">
+        {/* Left — copy */}
+        <div className="max-w-xl text-center lg:text-left">
           <span
-            className="block font-playfair italic font-normal text-5xl sm:text-7xl md:text-8xl hero-anim hero-reveal"
-            style={{ letterSpacing: '-0.05em', animationDelay: '0.25s' }}
+            className="hero-anim hero-fade inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/75 backdrop-blur"
+            style={{ animationDelay: '0.1s' }}
           >
-            Think it.
+            <span className="panel-live" />
+            Real software, shipped for real businesses
           </span>
-          <span
-            className="block font-normal text-5xl sm:text-7xl md:text-8xl -mt-1 hero-anim hero-reveal"
-            style={{ letterSpacing: '-0.08em', animationDelay: '0.42s' }}
+          <h1 className="mt-6 text-white leading-[0.92]">
+            <span
+              className="block font-playfair italic font-normal text-5xl sm:text-6xl md:text-7xl hero-anim hero-reveal"
+              style={{ letterSpacing: '-0.04em', animationDelay: '0.25s' }}
+            >
+              Think it.
+            </span>
+            <span
+              className="block font-semibold text-5xl sm:text-6xl md:text-7xl -mt-1 hero-anim hero-reveal"
+              style={{ letterSpacing: '-0.06em', animationDelay: '0.42s' }}
+            >
+              We build it.
+            </span>
+          </h1>
+          <p
+            className="mx-auto lg:mx-0 mt-6 max-w-md text-base sm:text-lg leading-relaxed text-white/70 hero-anim hero-fade"
+            style={{ animationDelay: '0.7s' }}
           >
-            We build it.
-          </span>
-        </h1>
-      </div>
+            High-ROI software, automations, and internal tools for small businesses — from
+            customer-facing sites to the dashboards that run the back office.{' '}
+            <span className="text-white/90">Hover the work to see it live.</span>
+          </p>
+          <div
+            className="mt-8 flex flex-col sm:flex-row items-center lg:items-start gap-4 hero-anim hero-fade"
+            style={{ animationDelay: '0.85s' }}
+          >
+            <a
+              href={BRAND.calLink}
+              className="group inline-flex items-center gap-2 rounded-full bg-[#b1531a] px-7 py-3.5 text-sm font-medium text-white transition-all hover:bg-[#964918] hover:scale-[1.03] active:scale-95 hover:shadow-lg hover:shadow-[#e8702a]/30"
+            >
+              Book a Free Audit
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+            </a>
+            <div className="flex items-center gap-2 text-xs text-white/50">
+              <span className="font-semibold text-white/75">Featured builds:</span>
+              BibSite · Boulder Bibs · Oasis
+            </div>
+          </div>
+        </div>
 
-      {/* 4. Bottom-left paragraph */}
-      <div
-        className="hidden sm:block absolute bottom-14 left-10 md:left-14 max-w-[260px] z-50 hero-anim hero-fade"
-        style={{ animationDelay: '0.7s' }}
-      >
-        <p className="text-sm text-white/80 leading-relaxed">
-          We design and build custom software, automations, and internal tools for small
-          businesses — turning the busywork that piles up into systems that quietly run
-          themselves.
-        </p>
-      </div>
-
-      {/* 5. Bottom-right block */}
-      <div
-        className="absolute bottom-10 sm:bottom-24 left-5 right-5 sm:left-auto sm:right-10 md:right-14 max-w-full sm:max-w-[260px] z-50 flex flex-col items-start gap-4 sm:gap-5 hero-anim hero-fade"
-        style={{ animationDelay: '0.85s' }}
-      >
-        <p className="text-xs sm:text-sm text-white/80 leading-relaxed">
-          Book a free audit and we'll map the highest-ROI automation hiding in your business —
-          then ship it in a fixed-price sprint.
-        </p>
-        <a
-          href={BRAND.calLink}
-          className="group inline-flex items-center gap-2 bg-[#b1531a] hover:bg-[#964918] text-white text-sm font-medium px-7 py-3 rounded-full transition-all hover:scale-[1.03] active:scale-95 hover:shadow-lg hover:shadow-[#e8702a]/30"
+        {/* Right — interactive work deck */}
+        <div
+          className="work-deck relative flex w-full items-center justify-center lg:justify-end hero-anim hero-fade"
+          style={{ animationDelay: '0.55s' }}
         >
-          Book a Free Audit
-          <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-        </a>
+          <div ref={deckRef} className="deck-inner">
+            {PIECES.map((p) => (
+              <WorkPanel key={p.id} piece={p} reduced={reduced} />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
